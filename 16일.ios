@@ -1,12 +1,85 @@
-enable → 게스트(일반) 모드에서 관리자 모드 진입
-conf t → 전역 설정 모드로 진입
-hostname [장비이름] → 장비 이름 지정
-enable secret cisco → 패스워드 지정 : cisco
-no ip domain lookup → ip 검색 기능 끄기
-line console 0 → console모드 진입
-logging synchronous → 로그 동기화, 명령과 로그를 분리
-exec-timeout 0 0 → 명령 세선의 타임 설정
-line vty 0 4 → 원격 접속 세션
-password cisco → 원격 세션 접속시 패스워드
-login → 연결시 인증 방식
+R1
+-------------------------------
+conf t
+hostname R1
+enable secret cisco
+no ip domain lookup
+line console 0
+logging synchronous
+line vty 0 4
+password cisco
+login
+int e1/0 
+ip add 192.168.0.1 255.255.255.252
+no shut 
+exit
+int e1/1
+ip add 192.168.0.13 255.255.255.252
+no shut 
+exit
+int e1/2 192.168.0.9 255.255.255.252
+no shut
+exit
+int e1/3 
+ip add 192.168.0.5 255.255.255.252
+no shut
 
+R2
+-----------------------------
+conf t
+hostname R2
+enable secret cisco
+no ip domain lookup
+line console 0
+logging synchronous
+line vty 0 4
+password cisco
+login
+int e1/0
+ip add 192.168.0.6 255.255.255.252
+no shut
+
+R3
+-----------------------------
+conf t
+hostname R3
+enable secret cisco
+no ip domain lookup
+line console 0
+logging synchronous
+line vty 0 4
+password cisco
+login
+int e1/0 
+ip add 192.168.0.14 255.255.255.252
+no shut
+
+R4
+-----------------------------
+conf t
+hostname R4
+enable secret cisco
+no ip domain lookup
+line console 0
+logging synchronous
+line vty 0 4
+password cisco
+login
+int e1/0
+ip add 192.168.0.2 255.255.255.252
+no shut
+
+R5
+-----------------------------
+conf t
+hostname R5
+enable secret cisco
+no ip domain lookup
+line console 0
+logging synchronous
+line vty 0 4
+password cisco
+login
+int e1/0
+ip add 192.168.0.10 255.255.255.252
+no shut

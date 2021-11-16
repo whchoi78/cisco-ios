@@ -1,85 +1,139 @@
-R1
--------------------------------
-conf t
-hostname R1
-enable secret cisco
-no ip domain lookup
-line console 0
-logging synchronous
-line vty 0 4
-password cisco
-login
-int e1/0 
-ip add 192.168.0.1 255.255.255.252
-no shut 
-exit
-int e1/1
-ip add 192.168.0.13 255.255.255.252
-no shut 
-exit
-int e1/2 192.168.0.9 255.255.255.252
-no shut
-exit
-int e1/3 
-ip add 192.168.0.5 255.255.255.252
-no shut
+라우터 장비에 접근 인터페이스
+-직접-
+1) console : 콘솔 케이블을 통해서 컴퓨터와 장비간에 직접 통신을 사용한 연결
+2) Aux : 모뎀을 연결하여 통신하는 방식(모뎀을 사용하지 않음)
 
-R2
------------------------------
-conf t
-hostname R2
-enable secret cisco
-no ip domain lookup
-line console 0
-logging synchronous
-line vty 0 4
-password cisco
-login
-int e1/0
-ip add 192.168.0.6 255.255.255.252
-no shut
+-간접- : 기본적으로 통신을 위한 설정이 되어 있을 경우에만 통신 가능
+3) vty : telnet, ssh와 같은 리모트 컨트롤 프로토콜을 이용하는 방법
+4) TFTP : 설정 파일을 백업, 복원 등을 통해서 장비에 설정하는 방식
+5) HTTP : 웹 상에서 접속하여 설정을 모니터링 하거나 설정 하는 방식
 
-R3
------------------------------
-conf t
-hostname R3
-enable secret cisco
-no ip domain lookup
-line console 0
-logging synchronous
-line vty 0 4
-password cisco
-login
-int e1/0 
-ip add 192.168.0.14 255.255.255.252
-no shut
+CLI 인터페이스 특징
+: 네트워크 장비에서 가장 기본적으로 제공
+1) Help 기능 : 명령어를 사용할 때에 
+2) 자동 완성 및 축약 : 명령어의 일부 값을 
+3) 에러 출력 : 출력한 에러를 통해서 잘 못
 
-R4
------------------------------
-conf t
-hostname R4
-enable secret cisco
-no ip domain lookup
-line console 0
-logging synchronous
-line vty 0 4
-password cisco
-login
-int e1/0
-ip add 192.168.0.2 255.255.255.252
-no shut
+## 네트워크 장비는 설정 모드로 진입시 단계를 거쳐서 진입 가능
+    ">" → "#" → " configure terminal(Global configure)" → 세부 설정 모드...
 
-R5
------------------------------
-conf t
-hostname R5
-enable secret cisco
-no ip domain lookup
-line console 0
-logging synchronous
-line vty 0 4
-password cisco
-login
-int e1/0
-ip add 192.168.0.10 255.255.255.252
-no shut
+    **세부 설정 모드
+    interface 설정 모드 : 전역 설정에서 interface type slot/port or port
+    ex) (config)# → 전역 설정 모드
+        (config)# interface ethernet 1/0 or (config)# interface loopback 0
+        (config-if)#
+        모드에서 나가는 명령어 : exit
+
+>> line 설정 모드 : line [접속모드][port][port]
+    ex) (config)# line console 0 → 콘솔 포트는 0번만 있음.
+        (config)# line vty 0 4 → 가상의 포트 0번 부터 4번 까지 포트를 사용함.
+
+인증 방식
+1) no login : 인증 없이 접속 허용
+2) login 접근시 : password로 지정된 문자열을 인증값으로 사용
+3) login local : local 계정의 인증 정보를 확인 하여 접근 여부 결정
+    **AAA 인증 방식을 사용하여 다른 인증서버를 이용하여 접근
+
+사용자 생성
+(config)# username admin privilege 15 secret cisco
+(config)# username user password user
+
+-------------------------------------------------------------------
+## 설정 정보가 저장 되는 파일
+- running-config(RAM메모리 상에 있는 설정 파일)
+ : 장비가 구동하면 사용하고 있는 설정 파일. 실시간으로 설정한 내용이 저장 동작 함.
+ # show running-config
+
+- startup-config(NVRAM 메모리에 저장하는 설정 파일)
+ : 장비가 구동할 최초 시기에 불러 오는 설정 파일. 초기에는 저장 되어 있는 값이 없음.
+ 나중에 추가로 저장 해야함
+ # show startup-config
+
+ ** do 명령어 : 어느 설정 모드에 있든지 상관없이 관리자 모드에서 사용하는 명령어를 사용 할 수 있게 하는 명령어
+
+## running-config 파일을 startup-config 파일로 저장하기
+1) copy 명령어를 이용한 방법(시스코 권장)
+   # copy running-config startup-config(중요)
+   running-config → startup-config 복사 
+
+2) write와 write memory
+
+>> 라우터 설정 모드 : router [프로토콜] [옵션]
+    ex) (config)# router rip
+        (config-router)#              
+
+enable → 게스트(일반) 모드에서 관리자 모드 진입
+conf t → 전역 설정 모드로 진입
+hostname [장비이름] → 장비 이름 지정
+enable secret cisco → 패스워드 지정 : cisco
+no ip domain lookup → ip 검색 기능 끄기
+line console 0 → console모드 진입
+logging synchronous → 로그 동기화, 명령과 로그를 분리
+exec-timeout 0 0 → 명령 세선의 타임 설정
+line vty 0 4 → 원격 접속 세션
+password cisco → 원격 세션 접속시 패스워드
+login → 연결시 인증 방식
+
+## ARP(Address Resolution Protocol) - 주소 결정 프로토콜
+: 통신을 위한 논리적 주소를 알아오는 프로토콜
+    IP주소를 이용하여 물리적 주소인 MAC 주소를 알아옴.
+종류 : ARP, RARP(보안상 이유로 사용 안함-harddiskless 시스템에서 사용), GARP, IARP, Proxy ARP.... 
+
+특징
+1) 하위 계층에서 알아오는 프롵토콜 이다.
+2) 3계층 프로토콜로 분류 할 수 도 있지만, 2계층 프로토콜이기 하여, 2.5계층 프로토콜로 불린다.
+3) IPv4를 사용하는 네트워크 환경에서 가장 중요한 프로토콜 중 하나 
+
+ARP의 동작
+1) ARP cache table의 통신을 하고자하는 주소의 MAC주소를 확인
+2) 없으면, ARP request 패킷을 전송함 (목적지 주소는 Broadcast로 전송함)
+3) ARP request 패킷을 받은 장비는 Destination IP주소를 확인. 자신에 것이 맞으면 응답, 아니면 Drop
+4) ARP reply에 자신의 정보를 포함하여 request에 대한 응답
+5) ARP request를 보낸 장비는 받은 응답을 통해서, IP와 MAC 주소의 매핑 데이터를 캐쉬에 저장.
+
+ARP 캐쉬 확인
+라우터
+(확인)
+# show arp-cache
+(삭제)
+# clear arp-cache
+
+[Windows 또는 Linux 계열의 장비]
+(확인)
+C:\> arp -a
+(삭제)
+C:\> arp -d
+
+---------------------------------------------
+## IPMP(Internet Group Management Protocol)
+: Multicast 통신을 관리 운영 하기 위해서 사용하는 프로토콜
+
+---------------------------------------------
+## ICMP
+: 인터넷 제어 메시지 프로토콜로 인터넷 상에 발생하는 여러 상황에 대한 메시지를 전공하여
+발생한 문제에 대해나 해결 또는 대처를 위한 정보를 제공하는 프로토콜
+주로 비연결 지향형 프로토콜을 지원하기 위해서 사용이 된다.
+(비연결 지향형 프로토콜 : IP UDP....)
+
+type : 네트워크의 대표적인 상황을 알려주는 코드 값(1byte)
+code : type에 따른 상세 정보를 담고있는 소스 코드
+
+반드시 알아야 할 type : 8(echo request), 0(echo reply), 3(Destination Unreachable), 11(Time Exceeded)
+추가 5(redirect) → GW가 둘 이상인 경우에 발생하는 메시지
+
+ICMP 프로토콜을 사용하는 프로그램
+1) ping → 통신하는 장비를 확인하기 위한 용도로 사용
+   네트워크 상의 통신 상태도 파악하는 것이 가능함.
+   패킷 전달 숫자와 전달하지 못한 숫자를 보여줌. 응답 시간을 표시
+
+2) tracert(Windows), traceroute(Linux, Unix) - (type 11)
+→ TTL 값을 1씩 증가 하면서 메시지를 전달, 목적지 까지 지나는 중계 장비에 대한 주소를 알아오는 프로그램
+
+##TTL
+초창기는 단위 second → 3계층 이상의 장비
+1) TTL 값은 3계층 이상의 장비를 지날떄마다 1씩 감소
+2) TTL 값이 0이면 해당 장비는 데이터를 전송하지 않고, Drop
+3) ICMP 메시지를 전송할 수 있다면, Type 11으로 패킷을 Drop했음을 알림
+
+tracert와 traceroute 동작은 TTL 값을 조작 하여 목적지 네트워크 장비에 전달하는 경로상의
+네트워크 장비들을 알아오는 프로그램
