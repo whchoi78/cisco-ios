@@ -1,0 +1,241 @@
+[기본설정]
+enable
+configure terminal
+hostname AWS1
+enable secret cisco
+no ip domain lookup
+ip domain name koreait.kr
+line console 0 
+logging synchronous
+exec-timeout 0 0
+line vty 0 4
+login local
+username admin privilege 15 secret P@ssw0rd
+
+interface range e0/0-3,e1/0-3,e2/0-3,e3/0-3
+shutdown
+
+[ASW1]
+vlan 10
+interface e3/3
+switchport mode access
+switchport access vlan 10
+no shutdown
+interface range e1/1-2
+description "ASW1-DSW1 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol pagp
+channel-group 11 mode auto
+no shutdown
+interface port-channel 11
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface range e2/1-2
+description "ASW1-DSW2 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol pagp
+channel-group 12 mode auto
+no shutdown
+interface port-channel 12
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface vlan 1 
+ip add 192.168.1.241 255.255.255.0
+no shutdown
+
+
+[ASW2]
+vlan 20
+interface e3/3
+switchport mode access
+switchport access vlan 20
+no shutdown
+interface range e1/1-2
+description "ASW2-DSW2 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol lacp
+channel-group 22 mode passive
+no shutdown
+interface port-channel 22
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface range e2/1-2
+description "ASW2-DSW1 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol lacp
+channel-group 21 mode passive
+no shutdown
+interface port-channel 21
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface vlan 1 
+ip add 192.168.1.242 255.255.255.0
+no shutdown
+
+
+[DSW1]
+vlan 10,20
+ip routing
+no ip cef
+interface range e1/1-2
+description "ASW1-DSW1 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol pagp
+channel-group 11 mode desirable
+no shutdown
+interface port-channel 11
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface range e2/1-2
+description "ASW2-DSW1 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol lacp
+channel-group 21 mode active
+no shutdown
+interface port-channel 22
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface range e3/1-2
+description "DSW1-DSW2 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-group 30 mode on
+no shutdown
+interface port-channel 30
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface vlan 1 
+ip add 192.168.1.251 255.255.255.0
+no shutdown
+interface vlan 10
+ip add 192.168.10.254 255.255.255.0
+no shutdown
+
+router ospf 1
+passive-interface default
+no passive-interface vlan 1
+net 192.168.10.254 0.0.0.0 area 1
+net 192.168.1.251 0.0.0.0 area 1
+
+
+[DSW2]
+vlan 10,20
+ip routing
+no ip cef
+interface range e1/1-2
+description "ASW2-DSW2 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol lacp
+channel-group 22 mode active
+no shutdown
+interface port-channel 22
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface range e2/1-2
+description "ASW1-DSW2 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-protocol pagp
+channel-group 12 mode desirable
+no shutdown
+interface port-channel 12
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface range e3/1-2
+description "DSW1-DSW2 connection etherchannel"
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+channel-group 30 mode on
+no shutdown
+interface port-channel 30
+switchport trunk encapsulation dot1q
+switchport trunk allowed vlan 1,10,20
+switchport trunk native vlan 99
+switchport mode trunk
+switchport nonegotiate
+
+interface vlan 1 
+ip add 192.168.1.252 255.255.255.0
+no shutdown
+interface vlan 20
+ip add 192.168.20.254 255.255.255.0
+no shutdown
+
+router ospf 1
+passive-interface default
+no passive-interface vlan 1
+net 192.168.20.254 0.0.0.0 area 1
+net 192.168.1.252 0.0.0.0 area 1
